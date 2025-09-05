@@ -30,7 +30,7 @@ interface MapView {
 export function Maps() {
   const [isMapLoaded, setIsMapLoaded] = useState(false)
   const [currentMapView, setCurrentMapView] = useState<MapView>({
-    center: [-27.6057, 78.8352], // Updated coordinates
+    center: [-4.5655, 78.2224], // Updated coordinates
     zoom: 3
   })
   const [clickedCoordinates, setClickedCoordinates] = useState<[number, number] | null>(null)
