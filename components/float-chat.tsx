@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Send, User, Waves, Flag, RotateCcw } from "lucide-react"
+import { Send, User, Flag, RotateCcw } from "lucide-react"
 
 interface Message {
   id: string
@@ -31,14 +31,14 @@ const sampleQueries = [
 
 const argoResponses = {
   salinity:
-    "I found 47 ARGO floats with salinity profiles near the equator in March 2023. The average salinity was 35.2 PSU with variations between 34.8-35.6 PSU. Would you like me to show the depth profiles or map locations?",
+    "I found 23 ARGO floats with salinity profiles in the Indian Ocean region. The average salinity was 35.2 PSU with variations between 34.8-35.6 PSU. Would you like me to show the depth profiles or map locations?",
   temperature:
-    "Temperature data shows a warming trend of 0.3°C over the past decade in the Pacific Ocean. Current surface temperatures range from 18-28°C depending on latitude. Shall I display the temperature-depth profiles?",
-  bgc: "BGC (Biogeochemical) data from the Arabian Sea shows seasonal variations in oxygen levels (180-220 μmol/kg) and chlorophyll concentrations. 12 active BGC floats are currently monitoring this region.",
+    "Temperature data shows a warming trend of 0.3°C over the past decade in the Indian Ocean. Current surface temperatures range from 18-28°C depending on latitude. Shall I display the temperature-depth profiles?",
+  bgc: "BGC (Biogeochemical) data from the Arabian Sea shows seasonal variations in oxygen levels (180-220 μmol/kg) and chlorophyll concentrations. 6 active BGC floats are currently monitoring this region.",
   floats:
-    "I found 3 ARGO floats within 100km of those coordinates: Float 4902345 (25.1°N, 157.5°W), Float 4902346 (25.7°N, 158.1°W), and Float 4902347 (24.9°N, 157.3°W). All are active with recent profiles.",
+    "I found 2 ARGO floats within 100km of those coordinates: Float 2902345 (15.1°N, 73.5°E) and Float 2902346 (15.7°N, 74.1°E). Both are active with recent profiles.",
   oxygen:
-    "Currently tracking 156 floats with oxygen sensors. Recent measurements show typical oceanic oxygen minimum zones at 800-1200m depth. Would you like specific regional data?",
+    "Currently tracking 78 floats with oxygen sensors in the Indian Ocean. Recent measurements show typical oceanic oxygen minimum zones at 800-1200m depth. Would you like specific regional data?",
 }
 
 export function FloatChat({ isMinimized }: FloatChatProps) {
@@ -46,7 +46,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
     {
       id: "1",
       content:
-        "Hello! I'm your ARGO oceanographic data assistant. I can help you explore temperature, salinity, and biogeochemical data from over 3,800 active floats worldwide. Try asking about specific regions, time periods, or parameters!",
+        "Hello! I'm your Indian Ocean ARGO data assistant. I can help you explore temperature, salinity, and biogeochemical data from over 240 active floats in the Indian Ocean region. Try asking about specific regions, time periods, or parameters!",
       sender: "bot",
       timestamp: new Date(),
       type: "text",
@@ -73,22 +73,22 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
 
     const lower = query.toLowerCase()
 
-    if (lower.includes("salinity")) {
-      botResponse = argoResponses.salinity
-      responseType = "data"
-      responseData = { type: "salinity", count: 47, avgValue: "35.2 PSU" }
+          if (lower.includes("salinity")) {
+        botResponse = argoResponses.salinity
+        responseType = "data"
+        responseData = { type: "salinity", count: 23, avgValue: "35.2 PSU" }
     } else if (lower.includes("temperature")) {
       botResponse = argoResponses.temperature
       responseType = "data"
       responseData = { type: "temperature", trend: "+0.3°C/decade", range: "18-28°C" }
-    } else if (lower.includes("bgc") || lower.includes("oxygen")) {
-      botResponse = lower.includes("oxygen") ? argoResponses.oxygen : argoResponses.bgc
-      responseType = "data"
-      responseData = { type: "bgc", floats: lower.includes("oxygen") ? 156 : 12 }
-    } else if (lower.includes("float") || lower.includes("coordinates") || lower.includes("location")) {
-      botResponse = argoResponses.floats
-      responseType = "data"
-      responseData = { type: "location", floats: 3, coordinates: "25.4°N, 157.8°W" }
+          } else if (lower.includes("bgc") || lower.includes("oxygen")) {
+        botResponse = lower.includes("oxygen") ? argoResponses.oxygen : argoResponses.bgc
+        responseType = "data"
+        responseData = { type: "bgc", floats: lower.includes("oxygen") ? 78 : 6 }
+          } else if (lower.includes("float") || lower.includes("coordinates") || lower.includes("location")) {
+        botResponse = argoResponses.floats
+        responseType = "data"
+        responseData = { type: "location", floats: 2, coordinates: "15.4°N, 73.8°E" }
     }
 
     return { botResponse, responseType, responseData }
@@ -178,16 +178,20 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
           <CardHeader className={`${isMinimized ? "p-3" : "p-4 sm:p-6"} border-b border-white/20 dark:border-white/10`}>
             <CardTitle
               className={`flex items-center gap-2 ${
-                isMinimized ? "text-sm" : "text-lg sm:text-xl"
+                isMinimized ? "text-base" : "text-2xl sm:text-3xl"
               } font-semibold text-blue-600 dark:text-blue-400`}
             >
-              <Waves className={`${isMinimized ? "h-4 w-4" : "h-5 w-5 sm:h-6 sm:w-6"} text-cyan-500`} />
+              <img 
+                src="/logo.png" 
+                alt="Logo" 
+                className={`${isMinimized ? "h-4 w-4" : "h-5 w-5 sm:h-6 sm:w-6"} object-contain`}
+              />
               FloatChat
               <Badge
                 variant="secondary"
                 className="ml-auto text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
               >
-                3,847 Active Floats
+                247 Active Floats
               </Badge>
             </CardTitle>
           </CardHeader>
@@ -210,7 +214,11 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                       {message.sender === "user" ? (
                         <User className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        <Waves className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <img 
+                          src="/logo.png" 
+                          alt="Logo" 
+                          className="h-3 w-3 sm:h-4 sm:w-4 object-contain"
+                        />
                       )}
                     </div>
 
@@ -230,10 +238,10 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                       {message.type === "data" && message.data && (
                         <div className="mt-2 p-3 bg-white/70 dark:bg-slate-800/70 border border-white/30 dark:border-slate-700 rounded-lg backdrop-blur-sm">
                           <div className="flex items-center gap-2 mb-2">
-                            {message.data.type === "salinity" && <Waves className="h-4 w-4 text-blue-500" />}
-                            {message.data.type === "temperature" && <Waves className="h-4 w-4 text-red-500" />}
-                            {message.data.type === "bgc" && <Waves className="h-4 w-4 text-green-500" />}
-                            {message.data.type === "location" && <Waves className="h-4 w-4 text-purple-500" />}
+                            {message.data.type === "salinity" && <img src="/logo.png" alt="Logo" className="h-4 w-4 object-contain" />}
+                            {message.data.type === "temperature" && <img src="/logo.png" alt="Logo" className="h-4 w-4 object-contain" />}
+                            {message.data.type === "bgc" && <img src="/logo.png" alt="Logo" className="h-4 w-4 object-contain" />}
+                            {message.data.type === "location" && <img src="/logo.png" alt="Logo" className="h-4 w-4 object-contain" />}
                             <span className="text-xs font-medium text-slate-700 dark:text-slate-200 capitalize">
                               {message.data.type} Data
                             </span>
@@ -285,7 +293,11 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                 {isTyping && (
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-500 text-white shadow-lg">
-                      <Waves className="h-4 w-4" />
+                      <img 
+                        src="/logo.png" 
+                        alt="Logo" 
+                        className="h-4 w-4 object-contain"
+                      />
                     </div>
                     <div className="flex-1">
                       <div className="inline-block p-3 rounded-lg text-sm bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-white/30 dark:border-slate-700 shadow-md">

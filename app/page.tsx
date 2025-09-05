@@ -12,12 +12,17 @@ type ViewMode = "chat" | "dashboard" | "maps"
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<ViewMode>("chat")
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(true)
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
     document.documentElement.classList.toggle("dark")
   }
+
+  // Initialize dark mode on mount
+  useState(() => {
+    document.documentElement.classList.add("dark")
+  })
 
   const handleLogoClick = () => {
     setViewMode("chat")
@@ -31,13 +36,20 @@ export default function Home() {
         <nav className="relative z-10 flex items-center justify-between p-4 backdrop-blur-sm bg-white/20 dark:bg-black/20 border-b border-white/20 dark:border-white/10">
           <div className="flex items-center cursor-pointer group" onClick={handleLogoClick}>
             <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-              <svg className="h-8 w-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <img 
+                src="/logo.png" 
+                alt="Logo" 
+                className="h-8 w-8 object-contain"
+                onError={(e) => {
+                  // Fallback to SVG if image fails to load
+                  e.currentTarget.style.display = 'none'
+                  e.currentTarget.nextElementSibling.style.display = 'block'
+                }}
+              />
+              <svg className="h-8 w-8 text-white hidden" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 1H5C3.9 1 3 1.9 3 3V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V9M19 9H14V4H19V9Z" />
               </svg>
             </div>
-            <span className="ml-3 text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400 bg-clip-text text-transparent">
-              ARGO
-            </span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -72,7 +84,7 @@ export default function Home() {
             className={`transition-all duration-500 ease-in-out ${
               viewMode === "chat"
                 ? "w-full flex-1"
-                : "w-full lg:w-96 lg:min-w-96 border-r border-white/20 dark:border-white/10"
+                : "w-full lg:w-96 lg:min-w-96 border-r border-white/20 dark:border-white/10 h-[calc(100vh-200px)]"
             }`}
           >
             <FloatChat isMinimized={viewMode !== "chat"} />

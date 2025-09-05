@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
-import { BarChart3, TrendingUp, Waves, Thermometer, Activity, Search, Image as ImageIcon } from "lucide-react"
+import { BarChart3, TrendingUp, Thermometer, Activity, Search, Image as ImageIcon } from "lucide-react"
 
 interface MetricCardProps {
   title: string
@@ -180,7 +180,7 @@ export function Dashboard() {
       <div className="h-full flex flex-col">
         <div className="mb-6 animate-in slide-in-from-top duration-500">
           <div className="flex items-center justify-between mb-2">
-            <h1 className="text-3xl font-bold text-foreground">ARGO Dashboard</h1>
+            <h1 className="text-3xl font-bold text-foreground">Ocean Data Dashboard</h1>
             <div className="flex gap-2 max-w-md flex-1 ml-8">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -217,22 +217,22 @@ export function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-in slide-in-from-bottom duration-700">
                 <MetricCard
                   title="Active Floats"
-                  value="3847"
-                  change="+12% from last month"
-                  icon={<Waves className="h-4 w-4" />}
+                  value="247"
+                  change="+8% from last month"
+                  icon={<img src="/logo.png" alt="Logo" className="h-4 w-4 object-contain" />}
                   delay={100}
                 />
                 <MetricCard
                   title="Profiles Today"
-                  value="1,234"
-                  change="+5% from yesterday"
+                  value="89"
+                  change="+3% from yesterday"
                   icon={<BarChart3 className="h-4 w-4" />}
                   delay={200}
                 />
                 <MetricCard
                   title="Avg Temperature"
-                  value="15.2°C"
-                  change="Global ocean average"
+                  value="26.8°C"
+                  change="Indian Ocean average"
                   icon={<Thermometer className="h-4 w-4" />}
                   delay={300}
                 />
