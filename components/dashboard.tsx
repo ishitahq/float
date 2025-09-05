@@ -6,7 +6,8 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { BarChart3, TrendingUp, Waves, Thermometer, Activity, Database, Globe, Zap } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { BarChart3, TrendingUp, Waves, Thermometer, Activity, Search, Image as ImageIcon } from "lucide-react"
 
 interface MetricCardProps {
   title: string
@@ -68,6 +69,9 @@ function MetricCard({ title, value, change, icon, delay }: MetricCardProps) {
 export function Dashboard() {
   const [loadingProgress, setLoadingProgress] = useState(0)
   const [isLoaded, setIsLoaded] = useState(false)
+  const [selectedFloat, setSelectedFloat] = useState<string | null>(null)
+  const [searchValue, setSearchValue] = useState("")
+  const [graphCount, setGraphCount] = useState(0)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -84,18 +88,115 @@ export function Dashboard() {
     return () => clearInterval(timer)
   }, [])
 
-  const recentProfiles = [
-    { id: "4902345", location: "Pacific Ocean", time: "2 hours ago", depth: "2000m", status: "active" },
-    { id: "4902346", location: "Atlantic Ocean", time: "4 hours ago", depth: "1500m", status: "active" },
-    { id: "4902347", location: "Indian Ocean", time: "6 hours ago", depth: "1800m", status: "processing" },
-    { id: "4902348", location: "Southern Ocean", time: "8 hours ago", depth: "2200m", status: "active" },
-  ]
+  const handleFloatSelect = (floatId: string) => {
+    setSelectedFloat(floatId)
+    // Specific graph counts for specific float numbers
+    const graphCounts: { [key: string]: number } = {
+      "12345": 3,
+      "23456": 4,
+    }
+    setGraphCount(graphCounts[floatId] || 3)
+  }
+
+  const handleSearch = () => {
+    if (searchValue.trim()) {
+      handleFloatSelect(searchValue.trim())
+    }
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
+
+  const GraphSection = () => {
+    if (!selectedFloat) return null
+
+    const renderGraphs = () => {
+      const graphs = []
+      const titles3 = [
+        "Pressure vs Temperature",
+        "Sea Temp vs Salinity",
+        "Pressure vs. Salinity",
+      ]
+      const titles4 = [...titles3, "Chlorophyll vs. Depth"]
+
+      for (let i = 1; i <= graphCount; i++) {
+        const title = (graphCount === 4 ? titles4 : titles3)[i - 1] ?? `Graph ${i}`
+        graphs.push(
+          <Card key={i} className="bg-card/80 backdrop-blur-sm transition-all duration-500 hover:scale-[1.02]">
+            <CardContent className="p-2">
+              <div className="text-xs font-medium text-muted-foreground mb-2 px-1">{title}</div>
+              <div className={`rounded-lg overflow-hidden ${
+                graphCount === 4 
+                  ? "aspect-square h-48" 
+                  : graphCount === 3 
+                  ? "aspect-video h-48" 
+                  : "aspect-video h-48"
+              }`}>
+                <img 
+                  src={`/graphs/float-4902345-graph${i}.png`}
+                  alt={title}
+                  className="w-full h-full object-contain rounded-md bg-muted p-1"
+                />
+              </div>
+            </CardContent>
+          </Card>
+        )
+      }
+      return graphs
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">Float {selectedFloat} Analytics</h2>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setSelectedFloat(null)}
+            className="text-xs"
+          >
+            Close
+          </Button>
+        </div>
+        <div className={`grid gap-4 transition-all duration-500 ${
+          graphCount === 4 
+            ? "grid-cols-2 grid-rows-2 max-h-[calc(100vh-200px)]" 
+            : graphCount === 3 
+            ? "grid-cols-3 grid-rows-1" 
+            : "grid-cols-1"
+        }`}>
+          {renderGraphs()}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full p-6 bg-background/50 backdrop-blur-sm">
       <div className="h-full flex flex-col">
         <div className="mb-6 animate-in slide-in-from-top duration-500">
-          <h1 className="text-3xl font-bold text-foreground mb-2">ARGO Dashboard</h1>
+          <div className="flex items-center justify-between mb-2">
+            <h1 className="text-3xl font-bold text-foreground">ARGO Dashboard</h1>
+            <div className="flex gap-2 max-w-md flex-1 ml-8">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Enter float number"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="pl-10"
+                />
+              </div>
+              <Button onClick={handleSearch} className="px-6">
+                Search
+              </Button>
+            </div>
+          </div>
           <p className="text-muted-foreground mb-4">Real-time oceanographic data visualization and analytics</p>
 
           {!isLoaded && (
@@ -111,170 +212,46 @@ export function Dashboard() {
 
         {isLoaded && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <MetricCard
-                title="Active Floats"
-                value="3847"
-                change="+12% from last month"
-                icon={<Waves className="h-4 w-4" />}
-                delay={100}
-              />
-              <MetricCard
-                title="Profiles Today"
-                value="1,234"
-                change="+5% from yesterday"
-                icon={<BarChart3 className="h-4 w-4" />}
-                delay={200}
-              />
-              <MetricCard
-                title="Avg Temperature"
-                value="15.2°C"
-                change="Global ocean average"
-                icon={<Thermometer className="h-4 w-4" />}
-                delay={300}
-              />
-              <MetricCard
-                title="Data Quality"
-                value="98.7%"
-                change="Quality controlled data"
-                icon={<TrendingUp className="h-4 w-4" />}
-                delay={400}
-              />
-            </div>
+            {/* Metrics Grid - Only show when no float is selected */}
+            {!selectedFloat && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 animate-in slide-in-from-bottom duration-700">
+                <MetricCard
+                  title="Active Floats"
+                  value="3847"
+                  change="+12% from last month"
+                  icon={<Waves className="h-4 w-4" />}
+                  delay={100}
+                />
+                <MetricCard
+                  title="Profiles Today"
+                  value="1,234"
+                  change="+5% from yesterday"
+                  icon={<BarChart3 className="h-4 w-4" />}
+                  delay={200}
+                />
+                <MetricCard
+                  title="Avg Temperature"
+                  value="15.2°C"
+                  change="Global ocean average"
+                  icon={<Thermometer className="h-4 w-4" />}
+                  delay={300}
+                />
+                <MetricCard
+                  title="Data Quality"
+                  value="98.7%"
+                  change="Quality controlled data"
+                  icon={<TrendingUp className="h-4 w-4" />}
+                  delay={400}
+                />
+              </div>
+            )}
 
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-card/80 backdrop-blur-sm animate-in slide-in-from-left duration-700 delay-500">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-primary" />
-                    Recent Profiles
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {recentProfiles.map((profile, index) => (
-                      <div
-                        key={profile.id}
-                        className={`flex items-center justify-between p-3 bg-muted/50 rounded-lg transition-all duration-300 hover:bg-muted/70 hover:scale-[1.02] animate-in slide-in-from-bottom duration-500`}
-                        style={{ animationDelay: `${600 + index * 100}ms` }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-3 h-3 rounded-full ${
-                              profile.status === "active" ? "bg-green-500 animate-pulse" : "bg-yellow-500"
-                            }`}
-                          />
-                          <div>
-                            <p className="font-medium">Float {profile.id}</p>
-                            <p className="text-sm text-muted-foreground">{profile.location}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium">{profile.time}</p>
-                          <p className="text-xs text-muted-foreground">Depth: {profile.depth}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-card/80 backdrop-blur-sm animate-in slide-in-from-right duration-700 delay-600">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5 text-primary" />
-                    Integration Status
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div
-                      className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg animate-in slide-in-from-bottom duration-500"
-                      style={{ animationDelay: "700ms" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Globe className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium">Leafly Dashboard</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
-                          Ready for Integration
-                        </div>
-                        <Button size="sm" variant="outline" className="h-6 text-xs bg-transparent">
-                          Connect
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div
-                      className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-950/20 rounded-lg animate-in slide-in-from-bottom duration-500"
-                      style={{ animationDelay: "800ms" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Globe className="h-4 w-4 text-green-600" />
-                        <span className="text-sm font-medium">OpenStreetMap</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs rounded-full">
-                          Ready for Integration
-                        </div>
-                        <Button size="sm" variant="outline" className="h-6 text-xs bg-transparent">
-                          Connect
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div
-                      className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg animate-in slide-in-from-bottom duration-500"
-                      style={{ animationDelay: "900ms" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Waves className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium">ARGO Data API</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full animate-pulse">
-                          Connected
-                        </div>
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
-                      </div>
-                    </div>
-
-                    <div
-                      className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg animate-in slide-in-from-bottom duration-500"
-                      style={{ animationDelay: "1000ms" }}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Database className="h-4 w-4 text-blue-600" />
-                        <span className="text-sm font-medium">Vector Database</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full animate-pulse">
-                          Active
-                        </div>
-                        <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
-                      </div>
-                    </div>
-
-                    <div
-                      className="mt-4 p-4 border-2 border-dashed border-muted-foreground/30 rounded-lg animate-in fade-in duration-700"
-                      style={{ animationDelay: "1100ms" }}
-                    >
-                      <div className="text-center">
-                        <Zap className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                        <h3 className="text-sm font-semibold text-foreground mb-1">Leafly Dashboard Integration</h3>
-                        <p className="text-xs text-muted-foreground mb-3">
-                          Advanced analytics and visualization components will be embedded here
-                        </p>
-                        <Button size="sm" variant="outline" className="text-xs bg-transparent">
-                          Configure Leafly Integration
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Graph Section - Full width when float is selected */}
+            {selectedFloat && (
+              <div className="flex-1 animate-in slide-in-from-right duration-700 delay-300">
+                <GraphSection />
+              </div>
+            )}
           </>
         )}
       </div>
