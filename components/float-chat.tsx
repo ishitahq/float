@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Send, Bot, User, Waves } from "lucide-react"
+import { Send, User, Waves, Flag, RotateCcw } from "lucide-react"
 
 interface Message {
   id: string
@@ -55,6 +55,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
+  const [flaggedMessageIds, setFlaggedMessageIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -64,6 +65,34 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
       }
     }
   }, [messages])
+
+  const buildBotResponse = (query: string) => {
+    let botResponse = "I understand your query about ARGO data. Let me process that information for you."
+    let responseType: "text" | "data" = "text"
+    let responseData: any = null
+
+    const lower = query.toLowerCase()
+
+    if (lower.includes("salinity")) {
+      botResponse = argoResponses.salinity
+      responseType = "data"
+      responseData = { type: "salinity", count: 47, avgValue: "35.2 PSU" }
+    } else if (lower.includes("temperature")) {
+      botResponse = argoResponses.temperature
+      responseType = "data"
+      responseData = { type: "temperature", trend: "+0.3°C/decade", range: "18-28°C" }
+    } else if (lower.includes("bgc") || lower.includes("oxygen")) {
+      botResponse = lower.includes("oxygen") ? argoResponses.oxygen : argoResponses.bgc
+      responseType = "data"
+      responseData = { type: "bgc", floats: lower.includes("oxygen") ? 156 : 12 }
+    } else if (lower.includes("float") || lower.includes("coordinates") || lower.includes("location")) {
+      botResponse = argoResponses.floats
+      responseType = "data"
+      responseData = { type: "location", floats: 3, coordinates: "25.4°N, 157.8°W" }
+    }
+
+    return { botResponse, responseType, responseData }
+  }
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return
@@ -82,31 +111,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
 
     setTimeout(() => {
       setIsTyping(false)
-
-      let botResponse = "I understand your query about ARGO data. Let me process that information for you."
-      let responseType: "text" | "data" = "text"
-      let responseData = null
-
-      const query = inputValue.toLowerCase()
-
-      if (query.includes("salinity")) {
-        botResponse = argoResponses.salinity
-        responseType = "data"
-        responseData = { type: "salinity", count: 47, avgValue: "35.2 PSU" }
-      } else if (query.includes("temperature")) {
-        botResponse = argoResponses.temperature
-        responseType = "data"
-        responseData = { type: "temperature", trend: "+0.3°C/decade", range: "18-28°C" }
-      } else if (query.includes("bgc") || query.includes("oxygen")) {
-        botResponse = query.includes("oxygen") ? argoResponses.oxygen : argoResponses.bgc
-        responseType = "data"
-        responseData = { type: "bgc", floats: query.includes("oxygen") ? 156 : 12 }
-      } else if (query.includes("float") || query.includes("coordinates") || query.includes("location")) {
-        botResponse = argoResponses.floats
-        responseType = "data"
-        responseData = { type: "location", floats: 3, coordinates: "25.4°N, 157.8°W" }
-      }
-
+      const { botResponse, responseType, responseData } = buildBotResponse(inputValue)
       const botMessage: Message = {
         id: (Date.now() + 1).toString(),
         content: botResponse,
@@ -118,6 +123,46 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
 
       setMessages((prev) => [...prev, botMessage])
     }, 1500)
+  }
+
+  const handleRetry = (botMessageId: string) => {
+    const idx = messages.findIndex((m) => m.id === botMessageId)
+    if (idx === -1) return
+    // find the nearest previous user message as the source query
+    let sourceQuery = ""
+    for (let i = idx - 1; i >= 0; i--) {
+      if (messages[i].sender === "user") {
+        sourceQuery = messages[i].content
+        break
+      }
+    }
+    if (!sourceQuery) return
+    setIsTyping(true)
+    setTimeout(() => {
+      setIsTyping(false)
+      const { botResponse, responseType, responseData } = buildBotResponse(sourceQuery)
+      const newBotMessage: Message = {
+        id: (Date.now() + Math.random()).toString(),
+        content: botResponse,
+        sender: "bot",
+        timestamp: new Date(),
+        type: responseType,
+        data: responseData,
+      }
+      setMessages((prev) => [...prev, newBotMessage])
+    }, 800)
+  }
+
+  const toggleFlag = (messageId: string) => {
+    setFlaggedMessageIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(messageId)) {
+        next.delete(messageId)
+      } else {
+        next.add(messageId)
+      }
+      return next
+    })
   }
 
   const handleSampleQuery = (query: string) => {
@@ -165,7 +210,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                       {message.sender === "user" ? (
                         <User className="h-3 w-3 sm:h-4 sm:w-4" />
                       ) : (
-                        <Bot className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <Waves className="h-3 w-3 sm:h-4 sm:w-4" />
                       )}
                     </div>
 
@@ -204,8 +249,34 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                         </div>
                       )}
 
-                      <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {message.timestamp.toLocaleTimeString()}
+                      <div className="flex items-center gap-2 mt-1">
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                          {message.timestamp.toLocaleTimeString()}
+                        </div>
+                        {message.sender === "bot" && (
+                          <div className="ml-2 flex items-center gap-2 text-slate-400">
+                            <button
+                              aria-label="Flag response"
+                              title="Flag response"
+                              onClick={() => toggleFlag(message.id)}
+                              className={`transition-colors hover:text-slate-600 dark:hover:text-slate-200 ${
+                                flaggedMessageIds.has(message.id)
+                                  ? "text-red-500"
+                                  : "text-slate-400"
+                              }`}
+                            >
+                              <Flag className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              aria-label="Try again"
+                              title="Try again"
+                              onClick={() => handleRetry(message.id)}
+                              className="transition-colors hover:text-slate-600 dark:hover:text-slate-200"
+                            >
+                              <RotateCcw className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -214,7 +285,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                 {isTyping && (
                   <div className="flex items-start gap-3">
                     <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-cyan-500 to-blue-500 text-white shadow-lg">
-                      <Bot className="h-4 w-4" />
+                      <Waves className="h-4 w-4" />
                     </div>
                     <div className="flex-1">
                       <div className="inline-block p-3 rounded-lg text-sm bg-white/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 border border-white/30 dark:border-slate-700 shadow-md">
