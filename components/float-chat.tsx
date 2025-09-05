@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Send, User, Flag, RotateCcw } from "lucide-react"
+import { Send, User, Flag, RotateCcw, Mic } from "lucide-react"
 
 interface Message {
   id: string
@@ -54,6 +54,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
   ])
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const [flaggedMessageIds, setFlaggedMessageIds] = useState<Set<string>>(new Set())
 
@@ -167,6 +168,12 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
 
   const handleSampleQuery = (query: string) => {
     setInputValue(query)
+  }
+
+  const handleVoiceToggle = () => {
+    setIsRecording(!isRecording)
+    // TODO: Implement voice recording functionality
+    console.log("Voice recording:", !isRecording ? "started" : "stopped")
   }
 
   return (
@@ -355,6 +362,20 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                   className="flex-1 text-sm bg-white/80 dark:bg-slate-800/80 border-white/30 dark:border-slate-700 text-slate-700 dark:text-slate-200 placeholder:text-slate-500 dark:placeholder:text-slate-400"
                   disabled={isTyping}
                 />
+                <Button
+                  onClick={handleVoiceToggle}
+                  size="icon"
+                  variant={isRecording ? "default" : "outline"}
+                  className={`shrink-0 transition-all duration-200 ${
+                    isRecording 
+                      ? "bg-red-500 hover:bg-red-600 text-white shadow-lg animate-pulse" 
+                      : "bg-white/80 dark:bg-slate-800/80 border-white/30 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-white/90 dark:hover:bg-slate-700/90"
+                  }`}
+                  disabled={isTyping}
+                  title={isRecording ? "Stop recording" : "Start voice input"}
+                >
+                  <Mic className="h-4 w-4" />
+                </Button>
                 <Button
                   onClick={handleSendMessage}
                   size="icon"
