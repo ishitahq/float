@@ -16,12 +16,16 @@ export default function Home() {
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode)
-    document.documentElement.classList.toggle("dark")
+    if (typeof window !== "undefined") {
+      document.documentElement.classList.toggle("dark")
+    }
   }
 
   // Initialize dark mode on mount
   useState(() => {
-    document.documentElement.classList.add("dark")
+    if (typeof window !== "undefined") {
+      document.documentElement.classList.add("dark")
+    }
   })
 
   const handleLogoClick = () => {
