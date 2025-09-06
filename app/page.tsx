@@ -7,39 +7,30 @@ import { Dashboard } from "@/components/dashboard"
 import { Maps } from "@/components/maps"
 import { WaterBackground } from "@/components/water-background"
 import { Moon, Sun } from "lucide-react"
+import { useTheme } from "next-themes"
 
 type ViewMode = "chat" | "dashboard" | "maps"
 
 export default function Home() {
   const [viewMode, setViewMode] = useState<ViewMode>("chat")
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const { theme, setTheme } = useTheme()
 
   const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode)
-    if (typeof window !== "undefined") {
-      document.documentElement.classList.toggle("dark")
-    }
+    setTheme(theme === "dark" ? "light" : "dark")
   }
-
-  // Initialize dark mode on mount
-  useState(() => {
-    if (typeof window !== "undefined") {
-      document.documentElement.classList.add("dark")
-    }
-  })
 
   const handleLogoClick = () => {
     setViewMode("chat")
   }
 
   return (
-    <div className={`min-h-screen relative ${isDarkMode ? "dark" : ""}`}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-blue-950 dark:to-cyan-950 transition-colors duration-300">
+    <div className="min-h-screen relative">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-cyan-50 dark:from-slate-900 dark:via-blue-950 dark:to-cyan-950 transition-colors duration-50">
         <WaterBackground />
 
         <nav className="relative z-10 flex items-center justify-between p-4 backdrop-blur-sm bg-white/20 dark:bg-black/20 border-b border-white/20 dark:border-white/10">
           <div className="flex items-center cursor-pointer group" onClick={handleLogoClick}>
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg group-hover:shadow-xl transition-all duration-50 group-hover:scale-105">
               <img 
                 src="/logo.png" 
                 alt="Logo" 
@@ -60,14 +51,14 @@ export default function Home() {
             <Button
               variant={viewMode === "dashboard" ? "default" : "outline"}
               onClick={() => setViewMode("dashboard")}
-              className="rounded-2xl px-6 py-2 text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20 text-slate-700 dark:text-slate-200"
+              className="rounded-2xl px-6 py-2 text-sm transition-colors duration-50 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20 text-slate-700 dark:text-slate-200"
             >
               Dashboard
             </Button>
             <Button
               variant={viewMode === "maps" ? "default" : "outline"}
               onClick={() => setViewMode("maps")}
-              className="rounded-2xl px-6 py-2 text-sm transition-all duration-300 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20 text-slate-700 dark:text-slate-200"
+              className="rounded-2xl px-6 py-2 text-sm transition-colors duration-50 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20 text-slate-700 dark:text-slate-200"
             >
               Maps
             </Button>
@@ -76,16 +67,16 @@ export default function Home() {
               variant="outline"
               size="icon"
               onClick={toggleDarkMode}
-              className="rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20"
+              className="rounded-2xl transition-colors duration-50 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20"
             >
-              {isDarkMode ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-slate-600" />}
+              {theme === "dark" ? <Sun className="h-4 w-4 text-yellow-500" /> : <Moon className="h-4 w-4 text-slate-600" />}
             </Button>
           </div>
         </nav>
 
         <div className="relative z-10 flex min-h-[calc(100vh-80px)] overflow-hidden">
           <div
-            className={`transition-all duration-500 ease-in-out ${
+            className={`transition-colors duration-50 ${
               viewMode === "chat"
                 ? "w-full flex-1"
                 : "w-full lg:w-96 lg:min-w-96 border-r border-white/20 dark:border-white/10 h-[calc(100vh-200px)]"
@@ -95,7 +86,7 @@ export default function Home() {
           </div>
 
           {viewMode !== "chat" && (
-            <div className="flex-1 min-h-0 transition-all duration-500 ease-in-out animate-in slide-in-from-right overflow-auto">
+            <div className="flex-1 min-h-0 transition-colors duration-50 animate-in slide-in-from-right overflow-auto">
               {viewMode === "dashboard" && <Dashboard />}
               {viewMode === "maps" && <Maps />}
             </div>
