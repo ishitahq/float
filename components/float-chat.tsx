@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { Send, User, Flag, RotateCcw, Mic } from "lucide-react"
+import { Send, User, Flag, RotateCcw, Mic, Volume2, VolumeX } from "lucide-react"
 
 interface Message {
   id: string
@@ -55,8 +55,11 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
   const [inputValue, setInputValue] = useState("")
   const [isTyping, setIsTyping] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+  const [speechEnabled, setSpeechEnabled] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const [flaggedMessageIds, setFlaggedMessageIds] = useState<Set<string>>(new Set())
+  const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null)
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -66,6 +69,63 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
       }
     }
   }, [messages])
+
+  // Cleanup speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (speechSynthesisRef.current) {
+        window.speechSynthesis.cancel()
+      }
+    }
+  }, [])
+
+  // Text-to-speech functionality
+  const speakText = (text: string) => {
+    if (!speechEnabled) return
+
+    // Stop any current speech
+    if (speechSynthesisRef.current) {
+      window.speechSynthesis.cancel()
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate = 0.9
+    utterance.pitch = 1
+    utterance.volume = 0.8
+    
+    // Try to use a more natural voice if available
+    const voices = window.speechSynthesis.getVoices()
+    const preferredVoice = voices.find(voice => 
+      voice.name.includes('Google') || 
+      voice.name.includes('Microsoft') || 
+      voice.lang.startsWith('en')
+    )
+    if (preferredVoice) {
+      utterance.voice = preferredVoice
+    }
+
+    utterance.onstart = () => setIsSpeaking(true)
+    utterance.onend = () => setIsSpeaking(false)
+    utterance.onerror = () => setIsSpeaking(false)
+
+    speechSynthesisRef.current = utterance
+    window.speechSynthesis.speak(utterance)
+  }
+
+  const stopSpeaking = () => {
+    if (speechSynthesisRef.current) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+    }
+  }
+
+  const toggleSpeech = () => {
+    if (isSpeaking) {
+      stopSpeaking()
+    } else {
+      setSpeechEnabled(!speechEnabled)
+    }
+  }
 
   const buildBotResponse = (query: string) => {
     let botResponse = "I understand your query about ARGO data. Let me process that information for you."
@@ -123,6 +183,11 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
       }
 
       setMessages((prev) => [...prev, botMessage])
+      
+      // Speak the response if speech is enabled
+      if (speechEnabled) {
+        setTimeout(() => speakText(botResponse), 100)
+      }
     }, 1500)
   }
 
@@ -151,6 +216,11 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
         data: responseData,
       }
       setMessages((prev) => [...prev, newBotMessage])
+      
+      // Speak the response if speech is enabled
+      if (speechEnabled) {
+        setTimeout(() => speakText(newBotMessage.content), 100)
+      }
     }, 800)
   }
 
@@ -200,6 +270,14 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
               >
                 247 Active Floats
               </Badge>
+              {speechEnabled && (
+                <Badge
+                  variant="secondary"
+                  className="ml-2 text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 animate-pulse"
+                >
+                  🔊 Speech Mode
+                </Badge>
+              )}
             </CardTitle>
           </CardHeader>
 
@@ -375,6 +453,30 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                   title={isRecording ? "Stop recording" : "Start voice input"}
                 >
                   <Mic className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={toggleSpeech}
+                  size="icon"
+                  variant={speechEnabled ? "default" : "outline"}
+                  className={`shrink-0 transition-all duration-200 ${
+                    speechEnabled || isSpeaking
+                      ? "bg-green-500 hover:bg-green-600 text-white shadow-lg" 
+                      : "bg-white/80 dark:bg-slate-800/80 border-white/30 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-white/90 dark:hover:bg-slate-700/90"
+                  }`}
+                  disabled={isTyping}
+                  title={
+                    isSpeaking 
+                      ? "Stop speaking" 
+                      : speechEnabled 
+                        ? "Speech enabled - click to disable" 
+                        : "Enable text-to-speech"
+                  }
+                >
+                  {isSpeaking ? (
+                    <VolumeX className="h-4 w-4" />
+                  ) : (
+                    <Volume2 className="h-4 w-4" />
+                  )}
                 </Button>
                 <Button
                   onClick={handleSendMessage}
