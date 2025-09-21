@@ -194,9 +194,10 @@ const dummyFloats: FloatData[] = [
 
 export function Maps() {
   const [isMapLoaded, setIsMapLoaded] = useState(false)
+  const [isClient, setIsClient] = useState(false)
   const [currentMapView, setCurrentMapView] = useState<MapView>({
-    center: [-4.5655, 78.2224], // Updated coordinates
-    zoom: 3
+    center: [-1.6258, 75.0113], 
+    zoom: 4
   })
   const [clickedCoordinates, setClickedCoordinates] = useState<[number, number] | null>(null)
   const [selectedFloat, setSelectedFloat] = useState<FloatData | null>(null)
@@ -206,6 +207,8 @@ export function Maps() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'maintenance'>('all')
 
   useEffect(() => {
+    // Set client-side flag
+    setIsClient(true)
     // Simulate map loading
     const timer = setTimeout(() => setIsMapLoaded(true), 1500)
     return () => clearTimeout(timer)
@@ -248,6 +251,10 @@ export function Maps() {
 
   // Helper function to create custom icon
   const createCustomIcon = (status: string) => {
+    if (typeof window === 'undefined') {
+      return null
+    }
+    
     return L.divIcon({
       className: 'custom-float-icon',
       html: `<div style="
@@ -319,7 +326,7 @@ export function Maps() {
                         <p className="text-muted-foreground">Initializing interactive map interface...</p>
                       </div>
                     </div>
-                  ) : (
+                  ) : isClient ? (
                     <div className="h-full w-full">
                       <MapContainer
                         {...({
@@ -350,7 +357,7 @@ export function Maps() {
                             <Marker
                               {...({
                                 position: float.position,
-                                icon: createCustomIcon(float.status),
+                                icon: createCustomIcon(float.status) || undefined,
                                 eventHandlers: {
                                   click: () => {
                                     setSelectedFloat(float)
@@ -416,6 +423,14 @@ export function Maps() {
                           </div>
                         ))}
                       </MapContainer>
+                    </div>
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+                        <h3 className="text-lg font-semibold text-foreground mb-2">Loading Map</h3>
+                        <p className="text-muted-foreground">Initializing client-side components...</p>
+                      </div>
                     </div>
                   )}
                 </div>
