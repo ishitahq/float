@@ -260,10 +260,10 @@ export function Maps() {
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 10px;
+        font-size: 12px;
         color: white;
         font-weight: bold;
-      ">F</div>`,
+      ">●</div>`,
       iconSize: [20, 20],
       iconAnchor: [10, 10]
     })

@@ -57,6 +57,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
   const [isRecording, setIsRecording] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [speechEnabled, setSpeechEnabled] = useState(false)
+  const [speechSupported, setSpeechSupported] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const [flaggedMessageIds, setFlaggedMessageIds] = useState<Set<string>>(new Set())
   const speechSynthesisRef = useRef<SpeechSynthesisUtterance | null>(null)
@@ -70,10 +71,17 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
     }
   }, [messages])
 
+  // Check speech synthesis support on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      setSpeechSupported(true)
+    }
+  }, [])
+
   // Cleanup speech synthesis on unmount
   useEffect(() => {
     return () => {
-      if (speechSynthesisRef.current) {
+      if (speechSynthesisRef.current && typeof window !== 'undefined') {
         window.speechSynthesis.cancel()
       }
     }
@@ -81,7 +89,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
 
   // Text-to-speech functionality
   const speakText = (text: string) => {
-    if (!speechEnabled) return
+    if (!speechEnabled || typeof window === 'undefined') return
 
     // Stop any current speech
     if (speechSynthesisRef.current) {
@@ -113,7 +121,7 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
   }
 
   const stopSpeaking = () => {
-    if (speechSynthesisRef.current) {
+    if (speechSynthesisRef.current && typeof window !== 'undefined') {
       window.speechSynthesis.cancel()
       setIsSpeaking(false)
     }
@@ -123,7 +131,11 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
     if (isSpeaking) {
       stopSpeaking()
     } else {
-      setSpeechEnabled(!speechEnabled)
+      if (speechSupported) {
+        setSpeechEnabled(!speechEnabled)
+      } else {
+        console.warn('Speech synthesis not supported in this browser')
+      }
     }
   }
 
@@ -463,13 +475,15 @@ export function FloatChat({ isMinimized }: FloatChatProps) {
                       ? "bg-green-500 hover:bg-green-600 text-white shadow-lg" 
                       : "bg-white/80 dark:bg-slate-800/80 border-white/30 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-white/90 dark:hover:bg-slate-700/90"
                   }`}
-                  disabled={isTyping}
+                  disabled={isTyping || !speechSupported}
                   title={
-                    isSpeaking 
-                      ? "Stop speaking" 
-                      : speechEnabled 
-                        ? "Speech enabled - click to disable" 
-                        : "Enable text-to-speech"
+                    !speechSupported
+                      ? "Speech synthesis not supported"
+                      : isSpeaking 
+                        ? "Stop speaking" 
+                        : speechEnabled 
+                          ? "Speech enabled - click to disable" 
+                          : "Enable text-to-speech"
                   }
                 >
                   {isSpeaking ? (
