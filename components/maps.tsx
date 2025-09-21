@@ -195,8 +195,8 @@ export function Maps() {
   const [isMapLoaded, setIsMapLoaded] = useState(false)
   const [isClient, setIsClient] = useState(false)
   const [currentMapView, setCurrentMapView] = useState<MapView>({
-    center: [-1.6258, 75.0113], 
-    zoom: 4
+    center: [-3.3362, 78.3926], 
+    zoom: 3
   })
   const [clickedCoordinates, setClickedCoordinates] = useState<[number, number] | null>(null)
   const [selectedFloat, setSelectedFloat] = useState<FloatData | null>(null)
