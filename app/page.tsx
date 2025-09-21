@@ -4,10 +4,32 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { FloatChat } from "@/components/float-chat"
 import { Dashboard } from "@/components/dashboard"
-import { Maps } from "@/components/maps"
 import { WaterBackground } from "@/components/water-background"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
+import dynamic from "next/dynamic"
+
+// Dynamically import Maps component to avoid SSR issues
+const Maps = dynamic(() => import("@/components/maps").then((mod) => ({ default: mod.Maps })), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-screen overflow-hidden p-6 bg-background/50 backdrop-blur-sm">
+      <div className="h-full flex flex-col">
+        <div className="mb-6 animate-in slide-in-from-top duration-500 flex-shrink-0">
+          <h1 className="text-3xl font-bold text-foreground mb-2">ARGO Float Map</h1>
+          <p className="text-muted-foreground">Interactive map for exploring oceanographic data in the Indian Ocean</p>
+        </div>
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">Loading Map</h3>
+            <p className="text-muted-foreground">Initializing interactive map interface...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+})
 
 type ViewMode = "chat" | "dashboard" | "maps"
 

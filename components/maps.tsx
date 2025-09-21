@@ -10,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Activity, Globe, MapPin, Eye, EyeOff, Filter, Settings } from "lucide-react"
 import dynamic from "next/dynamic"
-import L from "leaflet"
 
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false })
@@ -214,6 +213,27 @@ export function Maps() {
     return () => clearTimeout(timer)
   }, [])
 
+  // Don't render anything on server side
+  if (!isClient) {
+    return (
+      <div className="h-screen overflow-hidden p-6 bg-background/50 backdrop-blur-sm">
+        <div className="h-full flex flex-col">
+          <div className="mb-6 animate-in slide-in-from-top duration-500 flex-shrink-0">
+            <h1 className="text-3xl font-bold text-foreground mb-2">ARGO Float Map</h1>
+            <p className="text-muted-foreground">Interactive map for exploring oceanographic data in the Indian Ocean</p>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">Loading Map</h3>
+              <p className="text-muted-foreground">Initializing client-side components...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Helper function to get filtered floats based on status
   const getFilteredFloats = () => {
     if (statusFilter === 'all') return dummyFloats
@@ -254,6 +274,9 @@ export function Maps() {
     if (typeof window === 'undefined') {
       return null
     }
+    
+    // Dynamically import Leaflet only when needed
+    const L = require('leaflet')
     
     return L.divIcon({
       className: 'custom-float-icon',
