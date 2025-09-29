@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { FloatChat } from "@/components/float-chat"
 import { Dashboard } from "@/components/dashboard"
+import { NetCDFAnalysis } from "@/components/netcdf-analysis"
+import { LandingPage } from "@/components/landing-page"
 import { WaterBackground } from "@/components/water-background"
 import { Moon, Sun } from "lucide-react"
 import { useTheme } from "next-themes"
@@ -31,10 +33,10 @@ const Maps = dynamic(() => import("@/components/maps").then((mod) => ({ default:
   )
 })
 
-type ViewMode = "chat" | "dashboard" | "maps"
+type ViewMode = "landing" | "chat" | "dashboard" | "maps" | "netcdf"
 
 export default function Home() {
-  const [viewMode, setViewMode] = useState<ViewMode>("chat")
+  const [viewMode, setViewMode] = useState<ViewMode>("landing")
   const { theme, setTheme } = useTheme()
 
   const toggleDarkMode = () => {
@@ -42,7 +44,7 @@ export default function Home() {
   }
 
   const handleLogoClick = () => {
-    setViewMode("chat")
+    setViewMode("landing")
   }
 
   return (
@@ -71,6 +73,20 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <Button
+              variant={viewMode === "landing" ? "default" : "outline"}
+              onClick={() => setViewMode("landing")}
+              className="rounded-2xl px-6 py-2 text-sm transition-colors duration-50 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20 text-slate-700 dark:text-slate-200"
+            >
+              Home
+            </Button>
+            <Button
+              variant={viewMode === "chat" ? "default" : "outline"}
+              onClick={() => setViewMode("chat")}
+              className="rounded-2xl px-6 py-2 text-sm transition-colors duration-50 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20 text-slate-700 dark:text-slate-200"
+            >
+              FloatChat
+            </Button>
+            <Button
               variant={viewMode === "dashboard" ? "default" : "outline"}
               onClick={() => setViewMode("dashboard")}
               className="rounded-2xl px-6 py-2 text-sm transition-colors duration-50 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20 text-slate-700 dark:text-slate-200"
@@ -84,6 +100,13 @@ export default function Home() {
             >
               Maps
             </Button>
+            <Button
+              variant={viewMode === "netcdf" ? "default" : "outline"}
+              onClick={() => setViewMode("netcdf")}
+              className="rounded-2xl px-6 py-2 text-sm transition-colors duration-50 hover:scale-105 hover:shadow-lg backdrop-blur-sm bg-white/80 dark:bg-black/80 border-white/30 dark:border-white/20 text-slate-700 dark:text-slate-200"
+            >
+              NetCDF Analysis
+            </Button>
 
             <Button
               variant="outline"
@@ -96,24 +119,29 @@ export default function Home() {
           </div>
         </nav>
 
-        <div className="relative z-10 flex min-h-[calc(100vh-80px)] overflow-hidden">
-          <div
-            className={`transition-colors duration-50 ${
-              viewMode === "chat"
-                ? "w-full flex-1"
-                : "w-full lg:w-96 lg:min-w-96 border-r border-white/20 dark:border-white/10 h-[calc(100vh-200px)]"
-            }`}
-          >
-            <FloatChat isMinimized={viewMode !== "chat"} />
-          </div>
-
-          {viewMode !== "chat" && (
-            <div className="flex-1 min-h-0 transition-colors duration-50 animate-in slide-in-from-right overflow-auto">
-              {viewMode === "dashboard" && <Dashboard />}
-              {viewMode === "maps" && <Maps />}
+        {viewMode === "landing" ? (
+          <LandingPage onNavigate={(view) => setViewMode(view)} />
+        ) : (
+          <div className="relative z-10 flex min-h-[calc(100vh-80px)] overflow-hidden">
+            <div
+              className={`transition-colors duration-50 ${
+                viewMode === "chat"
+                  ? "w-full flex-1"
+                  : "w-full lg:w-96 lg:min-w-96 border-r border-white/20 dark:border-white/10 h-[calc(100vh-200px)]"
+              }`}
+            >
+              <FloatChat isMinimized={viewMode !== "chat"} />
             </div>
-          )}
-        </div>
+
+            {viewMode !== "chat" && (
+              <div className="flex-1 min-h-0 transition-colors duration-50 animate-in slide-in-from-right overflow-auto">
+                {viewMode === "dashboard" && <Dashboard />}
+                {viewMode === "maps" && <Maps />}
+                {viewMode === "netcdf" && <NetCDFAnalysis />}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   )
