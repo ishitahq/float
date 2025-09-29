@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Activity, Globe, MapPin, Eye, EyeOff, Filter, Settings } from "lucide-react"
 import dynamic from "next/dynamic"
+import { useRouter } from "next/navigation"
 
 // Dynamically import Leaflet components to avoid SSR issues
 const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false })
@@ -204,6 +205,7 @@ export function Maps() {
   const [showFloats, setShowFloats] = useState(true)
   const [trajectoryTimeRange, setTrajectoryTimeRange] = useState<TrajectoryTimeRange>('1year')
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'maintenance'>('all')
+  const router = useRouter()
 
   useEffect(() => {
     // Set client-side flag
@@ -269,34 +271,44 @@ export function Maps() {
     }
   }
 
-  // Helper function to create custom icon
+  // Helper function to create custom ARGO float icon (inline SVG, status-colored)
   const createCustomIcon = (status: string) => {
     if (typeof window === 'undefined') {
       return null
     }
-    
-    // Dynamically import Leaflet only when needed
+
     const L = require('leaflet')
-    
+    const color = getStatusColor(status)
+
+    const svg = `
+      <svg width="28" height="28" viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+        <!-- Mast -->
+        <rect x="13" y="2" width="2" height="6" rx="1" fill="${color}" />
+        <!-- Antenna tip -->
+        <circle cx="14" cy="1.5" r="1" fill="${color}" />
+        <!-- Float body -->
+        <path d="M9,8 C9,6 11,5 14,5 C17,5 19,6 19,8 L19,18 C19,21 17,23 14,23 C11,23 9,21 9,18 Z" fill="${color}" stroke="white" stroke-width="1" />
+        <!-- Shading -->
+        <path d="M16.5,6.5 L16.5,20.5" stroke="rgba(255,255,255,0.5)" stroke-width="1" />
+      </svg>
+    `
+
     return L.divIcon({
       className: 'custom-float-icon',
-      html: `<div style="
-        width: 20px;
-        height: 20px;
-        background-color: ${getStatusColor(status)};
-        border: 3px solid white;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        color: white;
-        font-weight: bold;
-      ">●</div>`,
-      iconSize: [20, 20],
-      iconAnchor: [10, 10]
+      html: `
+        <div style="position: relative; width: 28px; height: 28px;">
+          ${svg}
+          <span style="position: absolute; right: -2px; bottom: -2px; width: 8px; height: 8px; border:2px solid white; border-radius: 50%; background-color: ${color}; box-shadow: 0 1px 2px rgba(0,0,0,0.3);"></span>
+        </div>
+      `,
+      iconSize: [28, 28],
+      iconAnchor: [14, 24]
     })
+  }
+
+  const openDepthProfile = (floatItem: FloatData) => {
+    const today = new Date().toISOString().split('T')[0]
+    router.push(`/profile/${encodeURIComponent(floatItem.id)}?date=${encodeURIComponent(today)}`)
   }
 
   // Function to handle map view changes (zoom, pan)
@@ -341,6 +353,7 @@ export function Maps() {
             <Card className="h-full bg-card/80 backdrop-blur-sm animate-in slide-in-from-left duration-700 delay-300">
               <CardContent className="p-4 h-full">
                 <div className="h-full bg-muted/30 rounded-lg border-2 border-dashed border-muted-foreground/30 relative overflow-hidden">
+                  
                   {!isMapLoaded ? (
                     <div className="h-full flex items-center justify-center">
                       <div className="text-center">
@@ -426,6 +439,11 @@ export function Maps() {
                                       <span className="text-muted-foreground">Deployed:</span>
                                       <span>{new Date(float.deploymentDate).toLocaleDateString()}</span>
                                     </div>
+                                  </div>
+                                  <div className="pt-3">
+                                    <Button size="sm" className="w-full" onClick={() => openDepthProfile(float)}>
+                                      View Depth Profile
+                                    </Button>
                                   </div>
                                 </div>
                               </Popup>
