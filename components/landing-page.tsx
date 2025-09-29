@@ -43,69 +43,6 @@ import {
   Satellite
 } from "lucide-react"
 
-interface FeatureCardProps {
-  icon: React.ReactNode
-  title: string
-  description: string
-  features: string[]
-  color: string
-  delay: number
-  onExplore?: () => void
-}
-
-function FeatureCard({ icon, title, description, features, color, delay, onExplore }: FeatureCardProps) {
-  const [isVisible, setIsVisible] = useState(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), delay)
-    return () => clearTimeout(timer)
-  }, [delay])
-
-  return (
-    <Card 
-      className={`bg-card/80 backdrop-blur-sm border-2 transition-all duration-700 hover:scale-105 hover:shadow-2xl ${
-        isVisible ? "animate-in slide-in-from-bottom-4 fade-in" : "opacity-0 translate-y-8"
-      }`}
-      style={{ borderColor: color + "20" }}
-    >
-      <CardHeader className="pb-4">
-        <div className="flex items-center gap-3 mb-2">
-          <div 
-            className="p-3 rounded-xl shadow-lg"
-            style={{ backgroundColor: color + "20", color: color }}
-          >
-            {icon}
-          </div>
-          <CardTitle className="text-xl font-bold">{title}</CardTitle>
-        </div>
-        <p className="text-muted-foreground">{description}</p>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-2 mb-4">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-2 text-sm">
-              <div 
-                className="w-2 h-2 rounded-full"
-                style={{ backgroundColor: color }}
-              />
-              <span>{feature}</span>
-            </div>
-          ))}
-        </div>
-        {onExplore && (
-          <Button 
-            onClick={onExplore}
-            className="w-full"
-            style={{ backgroundColor: color, color: 'white' }}
-          >
-            <ArrowRight className="h-4 w-4 mr-2" />
-            Explore {title}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  )
-}
 
 function AnimatedCounter({ end, duration = 2000, suffix = "" }: { end: number; duration?: number; suffix?: string }) {
   const [count, setCount] = useState(0)
@@ -131,71 +68,7 @@ interface LandingPageProps {
 }
 
 export function LandingPage({ onNavigate }: LandingPageProps) {
-  const [currentFeature, setCurrentFeature] = useState(0)
-  const [isLoaded, setIsLoaded] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => setIsLoaded(true), 500)
-    return () => clearTimeout(timer)
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentFeature(prev => (prev + 1) % 3)
-    }, 4000)
-    return () => clearInterval(interval)
-  }, [])
-
-   const mainFeatures = [
-     {
-       title: "AI-Powered FloatChat",
-       subtitle: "Your Ocean Data Assistant",
-       description: "Ask questions about ocean data in plain English. Get instant answers about temperature patterns, salinity changes, and float trajectories.",
-       icon: <MessageSquare className="h-8 w-8" />,
-       color: "#8b5cf6",
-       features: [
-         "Ask 'Show me temperature anomalies in the Bay of Bengal'",
-         "Voice commands: 'What's the salinity trend for float 2901234?'",
-         "Get instant graphs and data visualizations",
-         "Export chat conversations as reports",
-         "Smart suggestions based on your queries",
-         "Works with all dashboard and map data"
-       ],
-       onExplore: () => onNavigate?.('chat')
-     },
-     {
-       title: "Ocean Data Dashboard",
-       subtitle: "Live Float Monitoring",
-       description: "Real-time dashboard showing live data from 247 ARGO floats. Spot anomalies, track trends, and download data instantly.",
-       icon: <BarChart3 className="h-8 w-8" />,
-       color: "#3b82f6",
-       features: [
-         "Live temperature, pressure, and salinity readings",
-         "Anomaly alerts with severity levels (Critical/High/Medium)",
-         "Filter by depth, temperature range, or specific floats",
-         "Download data as CSV, TXT, or NetCDF files",
-         "Interactive graphs for each float's data history",
-         "Real-time status updates every 10 days"
-       ],
-       onExplore: () => onNavigate?.('dashboard')
-     },
-     {
-       title: "Interactive ARGO Float Map",
-       subtitle: "Visual Ocean Exploration",
-       description: "See exactly where each float is, track their journeys, and explore ocean data geographically.",
-       icon: <MapPin className="h-8 w-8" />,
-       color: "#10b981",
-       features: [
-         "Live float positions with custom markers",
-         "Color-coded by status: Green (active), Red (inactive)",
-         "Click any float to see its data and trajectory",
-         "Filter by active/inactive floats only",
-         "Zoom to specific regions or follow individual floats",
-         "View float paths over time with date controls"
-       ],
-       onExplore: () => onNavigate?.('maps')
-     }
-   ]
 
   const netcdfFeatures = [
     "Drag-and-drop NetCDF file upload interface",
@@ -232,16 +105,16 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
                India's premier oceanographic data visualization and analysis platform powered by AI. 
                Explore, analyze, and understand ocean data like never before.
              </p>
-            <div className="flex flex-wrap justify-center gap-4 mb-12">
-              <Button size="lg" className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-xl">
-                <Play className="h-5 w-5 mr-2" />
-                Explore Dashboard
-              </Button>
-              <Button size="lg" variant="outline" className="border-2 border-blue-200 hover:bg-blue-50">
-                <Download className="h-5 w-5 mr-2" />
-                Download Data
-              </Button>
-            </div>
+             <div className="flex flex-wrap justify-center gap-4 mb-12">
+               <Button size="lg" className="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white shadow-xl">
+                 <Play className="h-5 w-5 mr-2" />
+                 Start Exploring
+               </Button>
+               <Button size="lg" variant="outline" className="border-2 border-blue-200 hover:bg-blue-50">
+                 <MessageSquare className="h-5 w-5 mr-2" />
+                 Try FloatChat
+               </Button>
+             </div>
           </div>
         </div>
       </div>
@@ -265,30 +138,6 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
         </div>
       </div>
 
-      {/* Main Features Section */}
-      <div className="container mx-auto px-6 py-20">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold mb-4">Core Features</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Three powerful modules working together to provide comprehensive ocean data analysis
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {mainFeatures.map((feature, index) => (
-            <FeatureCard
-              key={index}
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
-              features={feature.features}
-              color={feature.color}
-              delay={index * 200}
-              onExplore={feature.onExplore}
-            />
-          ))}
-        </div>
-      </div>
 
        {/* FloatChat Detailed Section */}
        <div className="bg-gradient-to-r from-purple-50 to-violet-50 dark:from-purple-950/50 dark:to-violet-950/50 py-20">
@@ -579,81 +428,83 @@ export function LandingPage({ onNavigate }: LandingPageProps) {
        </div>
 
 
-      {/* NetCDF Analysis Section */}
-      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 py-20">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg">
-                  <Upload className="h-8 w-8" />
-                </div>
-                <div>
-                  <h2 className="text-3xl font-bold">NetCDF Analysis</h2>
-                  <p className="text-lg text-muted-foreground">Advanced file processing & insights</p>
-                </div>
-              </div>
-              <p className="text-muted-foreground mb-6">
-                Upload any NetCDF file and get clear, easy-to-understand insights from your ocean data. 
-                Our AI-powered analysis provides comprehensive oceanographic parameter analysis with professional reporting.
-              </p>
-              <div className="space-y-3">
-                {netcdfFeatures.map((feature, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="relative">
-              <Card className="bg-card/80 backdrop-blur-sm border-2 border-blue-200 dark:border-blue-800">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-blue-600" />
-                    Analysis Results
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                      <Thermometer className="h-6 w-6 text-blue-600 mx-auto mb-2" />
-                      <div className="text-sm font-medium">Temperature</div>
-                      <div className="text-xs text-muted-foreground">4.2°C - 28.5°C</div>
-                    </div>
-                    <div className="text-center p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
-                      <Droplets className="h-6 w-6 text-cyan-600 mx-auto mb-2" />
-                      <div className="text-sm font-medium">Salinity</div>
-                      <div className="text-xs text-muted-foreground">34.2 - 35.8 PSU</div>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span>Data Quality</span>
-                      <span className="font-medium">98.7%</span>
-                    </div>
-                    <Progress value={98.7} className="h-2" />
-                  </div>
-                  <div className="space-y-2">
-                    <Button className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600">
-                      <Download className="h-4 w-4 mr-2" />
-                      Download PDF Report
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full border-blue-200 hover:bg-blue-50"
-                      onClick={() => onNavigate?.('netcdf')}
-                    >
-                      <ArrowRight className="h-4 w-4 mr-2" />
-                      Explore NetCDF Analysis
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </div>
+       {/* NetCDF Analysis Section */}
+       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-950/50 dark:to-cyan-950/50 py-20">
+         <div className="container mx-auto px-6">
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+             <div className="order-2 lg:order-1">
+               <div className="relative">
+                 <Card className="bg-card/80 backdrop-blur-sm border-2 border-blue-200 dark:border-blue-800">
+                   <CardHeader>
+                     <CardTitle className="flex items-center gap-2">
+                       <FileText className="h-5 w-5 text-blue-600" />
+                       Analysis Results
+                     </CardTitle>
+                   </CardHeader>
+                   <CardContent className="space-y-4">
+                     <div className="grid grid-cols-2 gap-4">
+                       <div className="text-center p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                         <Thermometer className="h-6 w-6 text-blue-600 mx-auto mb-2" />
+                         <div className="text-sm font-medium">Temperature</div>
+                         <div className="text-xs text-muted-foreground">4.2°C - 28.5°C</div>
+                       </div>
+                       <div className="text-center p-3 bg-cyan-50 dark:bg-cyan-900/20 rounded-lg">
+                         <Droplets className="h-6 w-6 text-cyan-600 mx-auto mb-2" />
+                         <div className="text-sm font-medium">Salinity</div>
+                         <div className="text-xs text-muted-foreground">34.2 - 35.8 PSU</div>
+                       </div>
+                     </div>
+                     <div className="space-y-2">
+                       <div className="flex justify-between text-sm">
+                         <span>Data Quality</span>
+                         <span className="font-medium">98.7%</span>
+                       </div>
+                       <Progress value={98.7} className="h-2" />
+                     </div>
+                     <div className="space-y-2">
+                       <Button className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600">
+                         <Download className="h-4 w-4 mr-2" />
+                         Download PDF Report
+                       </Button>
+                       <Button 
+                         variant="outline" 
+                         className="w-full border-blue-200 hover:bg-blue-50"
+                         onClick={() => onNavigate?.('netcdf')}
+                       >
+                         <ArrowRight className="h-4 w-4 mr-2" />
+                         Explore NetCDF Analysis
+                       </Button>
+                     </div>
+                   </CardContent>
+                 </Card>
+               </div>
+             </div>
+             <div className="order-1 lg:order-2">
+               <div className="flex items-center gap-3 mb-6">
+                 <div className="p-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg">
+                   <Upload className="h-8 w-8" />
+                 </div>
+                 <div>
+                   <h2 className="text-3xl font-bold">NetCDF Analysis</h2>
+                   <p className="text-lg text-muted-foreground">Advanced file processing & insights</p>
+                 </div>
+               </div>
+               <p className="text-muted-foreground mb-6">
+                 Upload any NetCDF file and get clear, easy-to-understand insights from your ocean data. 
+                 Our AI-powered analysis provides comprehensive oceanographic parameter analysis with professional reporting.
+               </p>
+               <div className="space-y-3">
+                 {netcdfFeatures.map((feature, index) => (
+                   <div key={index} className="flex items-center gap-3">
+                     <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                     <span>{feature}</span>
+                   </div>
+                 ))}
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
 
        {/* Advanced Features Grid */}
        <div className="container mx-auto px-6 py-20">
