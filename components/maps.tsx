@@ -38,7 +38,7 @@ interface FloatData {
   id: string
   name: string
   position: [number, number]
-  status: 'active' | 'inactive' | 'maintenance'
+  status: 'active' | 'inactive'
   lastUpdate: string
   depth: number
   temperature: number
@@ -125,7 +125,7 @@ const dummyFloats: FloatData[] = [
     id: 'float-4902348',
     name: 'ARGO-4902348',
     position: [-6.7890, 95.4321],
-    status: 'maintenance',
+    status: 'inactive',
     lastUpdate: '2024-01-10T12:20:00Z',
     depth: 2500,
     temperature: 3.1,
@@ -204,7 +204,7 @@ export function Maps() {
   const [showTrajectories, setShowTrajectories] = useState(true)
   const [showFloats, setShowFloats] = useState(true)
   const [trajectoryTimeRange, setTrajectoryTimeRange] = useState<TrajectoryTimeRange>('1year')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive' | 'maintenance'>('all')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all')
   const router = useRouter()
 
   useEffect(() => {
@@ -264,8 +264,6 @@ export function Maps() {
         return '#22c55e' // green
       case 'inactive':
         return '#ef4444' // red
-      case 'maintenance':
-        return '#f59e0b' // amber
       default:
         return '#6b7280' // gray
     }
@@ -412,8 +410,7 @@ export function Maps() {
                                         variant={float.status === 'active' ? 'default' : 'secondary'}
                                         className={`text-xs ${
                                           float.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                          float.status === 'inactive' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                                          'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                                          'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                                         }`}
                                       >
                                         {float.status}
@@ -527,7 +524,6 @@ export function Maps() {
                       <SelectItem value="all">All Floats</SelectItem>
                       <SelectItem value="active">Active Only</SelectItem>
                       <SelectItem value="inactive">Inactive Only</SelectItem>
-                      <SelectItem value="maintenance">Maintenance Only</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -577,12 +573,6 @@ export function Maps() {
                   </Badge>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">Maintenance</span>
-                  <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">
-                    {dummyFloats.filter(f => f.status === 'maintenance').length}
-                  </Badge>
-                </div>
-                <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Coverage Area</span>
                   <Badge variant="outline">Indian Ocean</Badge>
                 </div>
@@ -604,8 +594,7 @@ export function Maps() {
                     <Badge 
                       className={`text-xs ${
                         selectedFloat.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                        selectedFloat.status === 'inactive' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                        'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200'
+                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                       }`}
                     >
                       {selectedFloat.status}
